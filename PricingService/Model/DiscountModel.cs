@@ -8,6 +8,8 @@ namespace PricingService.Model
 {
     public class DiscountModel : ServiceModel
     {
+        [Key]
+        public int Id { get; set; }
         [Required]
         public double DiscountPercent { get; set; }
         public DateTime EndDate { get; set; }
