@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PricingService.Database;
 using PricingService.Model;
 using System;
 using System.Collections.Generic;
@@ -14,62 +16,195 @@ namespace PricingService.Controllers
     public class DiscountController : Controller
     {
         private ILogger<DiscountController> _logger;
+        private PricingDbContext _dbContext;
 
-        public DiscountController(ILogger<DiscountController> logger)
+        public DiscountController(ILogger<DiscountController> logger, PricingDbContext dbContext)
         {
-            this._logger = logger;
+            _logger = logger;
+            _dbContext = dbContext;
         }
 
         [Consumes("application/json")]
-        [HttpGet]
-        public IActionResult GetDiscount(ServiceModel model)
+        [HttpGet("{customerId:int}/{serviceName}")]
+        public IActionResult GetDiscount(int customerId, string serviceName)
         {
-            throw new NotImplementedException();
+            CustomerModel customer = _dbContext.Customers
+                .Include(x => x.FreeDays)
+                .Include(x => x.UsedServices)
+                .ThenInclude(x => x.Discount)
+                .FirstOrDefault(x => x.Id == customerId);
+
+            if (customer == null)
+            {
+                ModelState.AddModelError("customerId", "The customer with the specified customer id does not exist.");
+                return BadRequest(ModelState);
+            }
+
+            if (!customer.UsedServices.Any(x => x.ServiceName.ToUpperInvariant() == serviceName.ToUpperInvariant()))
+            {
+                ModelState.AddModelError("serviceName", "The customer does not use the service with the specified name.");
+                return BadRequest(ModelState);
+            }
+
+            DiscountModel discountModel = customer.UsedServices.First(x => x.ServiceName.ToUpperInvariant() == serviceName.ToUpperInvariant()).Discount;
+
+            double discount = discountModel != null ? discountModel.DiscountPercent : 0;
+
+            return new JsonResult(new
+            {
+                DiscountPercent = discount
+            });
         }
 
         [Consumes("application/json")]
-        [HttpPost]
-        [HttpPut]
-        public IActionResult AddDiscount(DiscountModel model)
+        [HttpPost("{customerId:int}")]
+        [HttpPut("{customerId:int}")]
+        public async Task<IActionResult> AddDiscount(int customerId, DiscountModel model)
         {
-            throw new NotImplementedException();
+            CustomerModel customer = _dbContext.Customers
+                .Include(x => x.FreeDays)
+                .Include(x => x.UsedServices)
+                .ThenInclude(x => x.Discount)
+                .FirstOrDefault(x => x.Id == customerId);
+
+            if (customer == null)
+            {
+                ModelState.AddModelError("customerId", "The customer with the specified customer id does not exist.");
+                return BadRequest(ModelState);
+            }
+
+            if (!customer.UsedServices.Any(x => x.ServiceName == model.ServiceName))
+            {
+                ModelState.AddModelError("ServiceName", "The customer does not use the service with the specified name.");
+                return BadRequest(ModelState);
+            }
+
+            ServiceModel service = customer.UsedServices.First(x => x.ServiceName == model.ServiceName);
+
+            if (Request.Method == "POST")
+            {
+                if (service.Discount != null)
+                {
+                    ModelState.AddModelError("ServiceName", "The specified service already has a discount. Use the PUT method to update the discount value.");
+                    return BadRequest(ModelState);
+                }
+
+                service.Discount = model;
+            }
+            else
+            {
+                if (service.Discount == null)
+                {
+                    ModelState.AddModelError("ServiceName", "The specified service does not have any discount. Use the POST method to add a new discount.");
+                    return BadRequest(ModelState);
+                }
+
+                service.Discount.DiscountPercent = model.DiscountPercent;
+                service.Discount.StartDate = model.StartDate;
+                service.Discount.EndDate = model.EndDate;
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return Ok();
         }
 
         [Consumes("application/json")]
-        [HttpDelete]
-        public IActionResult DeleteDiscount(ServiceModel model)
+        [HttpDelete("{customerId:int}/{serviceName}")]
+        public async Task<IActionResult> DeleteDiscount(int customerId, string serviceName)
         {
-            throw new NotImplementedException();
-        }
+            CustomerModel customer = _dbContext.Customers
+                .Include(x => x.FreeDays)
+                .Include(x => x.UsedServices)
+                .ThenInclude(x => x.Discount)
+                .FirstOrDefault(x => x.Id == customerId);
 
-        [Consumes("application/json")]
-        [HttpPost("baseprice")]
-        [HttpPut("baseprice")]
-        public IActionResult SetBasePrice(BasePriceModel model)
-        {
-            throw new NotImplementedException();
-        }
+            if (customer == null)
+            {
+                ModelState.AddModelError("customerId", "The customer with the specified customer id does not exist.");
+                return BadRequest(ModelState);
+            }
 
-        [Consumes("application/json")]
-        [HttpGet("baseprice")]
-        public IActionResult GetBasePrice(ServiceModel model)
-        {
-            throw new NotImplementedException();
+            if (!customer.UsedServices.Any(x => x.ServiceName.ToUpperInvariant() == serviceName.ToUpperInvariant()))
+            {
+                ModelState.AddModelError("serviceName", "The customer does not use the service with the specified name.");
+                return BadRequest(ModelState);
+            }
+
+            ServiceModel serviceModel = customer.UsedServices.First(x => x.ServiceName.ToUpperInvariant() == serviceName.ToUpperInvariant());
+            DiscountModel discountModel = serviceModel.Discount;
+
+            if (discountModel == null)
+            {
+                ModelState.AddModelError("serviceName", "There is no discount applied to the specified service.");
+                return BadRequest(ModelState);
+            }
+
+            serviceModel.Discount = null;
+            _dbContext.Discounts.Remove(discountModel);
+
+            await _dbContext.SaveChangesAsync();
+            return Ok();
         }
 
         [Consumes("application/json")]
         [HttpPost("freedays")]
         [HttpPut("freedays")]
-        public IActionResult SetFreeDays(FreeDaysModel model)
+        public async Task<IActionResult> SetFreeDays(FreeDaysModel model)
         {
-            throw new NotImplementedException();
+            CustomerModel customer = _dbContext.Customers
+                .Include(x => x.FreeDays)
+                .FirstOrDefault(x => x.Id == model.CustomerId);
+
+            if (customer == null)
+            {
+                ModelState.AddModelError("customerId", "The customer with the specified customer id does not exist.");
+                return BadRequest(ModelState);
+            }
+
+            if (Request.Method == "POST")
+            {
+                if (customer.FreeDays != null)
+                {
+                    ModelState.AddModelError("CustomerId", "The specified customer already has free days. Use the PUT method to update the free days value.");
+                    return BadRequest(ModelState);
+                }
+
+                customer.FreeDays = model;
+            }
+            else
+            {
+                if (customer.FreeDays == null)
+                {
+                    ModelState.AddModelError("CustomerId", "The specified customer does not have any free days. Use the POST method to add new free days.");
+                    return BadRequest(ModelState);
+                }
+
+                customer.FreeDays.FreeDays = model.FreeDays;
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return Ok();
         }
 
         [Consumes("application/json")]
-        [HttpGet("freedays")]
-        public IActionResult GetFreeDays(ServiceModel model)
+        [HttpGet("freedays/{customerId:int}")]
+        public IActionResult GetFreeDays(int customerId)
         {
-            throw new NotImplementedException();
+            CustomerModel customer = _dbContext.Customers.Include(x => x.FreeDays).FirstOrDefault(x => x.Id == customerId);
+
+            if (customer == null)
+            {
+                ModelState.AddModelError("customerId", "The customer with the specified id does note exist.");
+                return BadRequest(ModelState);
+            }
+
+            FreeDaysModel freeDaysModel = customer.FreeDays;
+
+            int freeDays = freeDaysModel != null ? freeDaysModel.FreeDays : 0;
+
+            return new JsonResult(new {
+                FreeDays = freeDays
+            });
         }
     }
 }
