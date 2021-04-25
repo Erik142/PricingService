@@ -12,5 +12,10 @@ namespace PricingService.Database
         public DbSet<BasePriceModel> BasePrices { get; set; }
         public DbSet<DiscountModel> Discounts { get; set; }
         public DbSet<FreeDaysModel> FreeDays { get; set; }
+
+        public PricingDbContext(DbContextOptions options) : base(options)
+        {
+
+        }
     }
 }
