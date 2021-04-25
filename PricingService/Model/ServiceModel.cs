@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace PricingService.Model
 {
-    public class ServiceModel
+    public class ServiceModel : ServiceDefinitionModel
     {
+        public int CustomerId { get; set; }
         [Required]
-        public int ConsumerId { get; set; }
-        public string ServiceName { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public DiscountModel Discount { get; set; }
     }
 }
