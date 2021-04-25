@@ -24,7 +24,21 @@ namespace PricingService.Controllers
             this._logger = logger;
             this._dbContext = dbContext;
         }
-
+        /// <summary>
+        /// Retrieves the total price for all used services for the specified customer within the specified time period.
+        /// If "EndDate" is not specified, the end date will be the date of today.
+        /// </summary>
+        /// <param name="customerId"></param>
+        /// <param name="model"></param>
+        /// <remarks>
+        /// Sample request:
+        /// 
+        ///     GET api/v1/price/50
+        ///     {
+        ///         "StartDate": "2010-03-29",
+        ///         "EndDate": "2020-06-05"
+        ///     }
+        /// </remarks>
         [Consumes("application/json")]
         [HttpGet("{customerId:int}")]
         public IActionResult GetTotal(int customerId, PriceFilterModel model)

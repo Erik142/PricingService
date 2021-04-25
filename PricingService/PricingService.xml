@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>PricingService</name>
+    </assembly>
+    <members>
+        <member name="M:PricingService.Controllers.DiscountController.GetDiscount(System.Int32,System.String)">
+            <summary>
+            Retrieves the discount in percent for the specified service and customer.
+            </summary>
+            <param name="customerId">The customer id</param>
+            <param name="serviceName">The service name</param>
+            <remarks>
+            Sample request:
+            
+                GET api/v1/discount/50/serviceb
+            </remarks>
+        </member>
+        <member name="M:PricingService.Controllers.DiscountController.AddDiscount(System.Int32,PricingService.Model.DiscountModel)">
+            <summary>
+            Adds or updates the discount for a specific service and customer.
+            </summary>
+            <param name="customerId">The customer id</param>
+            <param name="model">The request body, parsed as a DiscountModel object</param>
+            <remarks>
+            Sample request:
+            
+                POST/PUT api/v1/discount/50
+                {
+                    "ServiceName": "ServiceA",
+                    "StartDate": "2010-02-01",
+                    "EndDate": "2015-12-24",
+                    "DiscountPercent": 50
+                }
+            </remarks>
+        </member>
+        <member name="M:PricingService.Controllers.DiscountController.DeleteDiscount(System.Int32,System.String)">
+            <summary>
+            Deletes the discount for the specified service and customer.
+            </summary>
+            <param name="customerId">The customer id</param>
+            <param name="serviceName">The name of the service</param>
+            <remarks>
+            Sample request:
+                
+                DELETE api/v1/discount/50/servicea
+            </remarks>
+        </member>
+        <member name="M:PricingService.Controllers.DiscountController.SetFreeDays(PricingService.Model.FreeDaysModel)">
+            <summary>
+            Adds or updates free days for the specified customer. 
+            Use POST to add free days to the customer, or PUT to update free days for the customer.
+            </summary>
+            <param name="model">The request body, parsed as a FreeDaysModel object</param>
+            <remarks>
+            Sample request:
+                
+                POST/PUT api/v1/discount/freedays/
+                {
+                    "CustomerId": 50
+                    "FreeDays": 100
+                }
+            </remarks>
+        </member>
+        <member name="M:PricingService.Controllers.DiscountController.GetFreeDays(System.Int32)">
+            <summary>
+            Retrieves the free days for the specified customer
+            </summary>
+            <param name="customerId">The customer id</param>
+            <remarks>
+            Sample request:
+            
+                GET api/v1/discount/freedays/50
+            </remarks>
+        </member>
+        <member name="M:PricingService.Controllers.PriceController.GetTotal(System.Int32,PricingService.Model.PriceFilterModel)">
+            <summary>
+            Retrieves the total price for all used services for the specified customer within the specified time period.
+            If "EndDate" is not specified, the end date will be the date of today.
+            </summary>
+            <param name="customerId"></param>
+            <param name="model"></param>
+            <remarks>
+            Sample request:
+            
+                GET api/v1/price/50
+                {
+                    "StartDate": "2010-03-29",
+                    "EndDate": "2020-06-05"
+                }
+            </remarks>
+        </member>
+        <member name="M:PricingService.Controllers.ServiceController.AddService(System.Int32,PricingService.Model.ServiceModel)">
+            <summary>
+            Add a service to the customer with the id customerId or update an existing service for the customer. Use POST to add a new service, or PUT to update an existing service.
+            </summary>
+            <param name="customerId">The id for the customer</param>
+            <param name="service">The model, including at least the name of the service and the start date for the service</param>
+            <remarks>
+            Sample request (POST):
+            
+                POST api/v1/service/50
+                {
+                    "ServiceName": "ServiceA",
+                    "StartDate": "2015-01-01",
+                    "EndDate": "2020-12-31"
+                }
+            Sample request (PUT):
+            
+                PUT api/v1/service/50
+                {
+                    "ServiceName": "ServiceA",
+                    "StartDate": "2017-04-01",
+                }
+            </remarks>
+        </member>
+    </members>
+</doc>

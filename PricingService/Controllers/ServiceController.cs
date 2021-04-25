@@ -24,6 +24,28 @@ namespace PricingService.Controllers
             this._logger = logger;
         }
 
+        /// <summary>
+        /// Add a service to the customer with the id customerId or update an existing service for the customer. Use POST to add a new service, or PUT to update an existing service.
+        /// </summary>
+        /// <param name="customerId">The id for the customer</param>
+        /// <param name="service">The model, including at least the name of the service and the start date for the service</param>
+        /// <remarks>
+        /// Sample request (POST):
+        /// 
+        ///     POST api/v1/service/50
+        ///     {
+        ///         "ServiceName": "ServiceA",
+        ///         "StartDate": "2015-01-01",
+        ///         "EndDate": "2020-12-31"
+        ///     }
+        /// Sample request (PUT):
+        /// 
+        ///     PUT api/v1/service/50
+        ///     {
+        ///         "ServiceName": "ServiceA",
+        ///         "StartDate": "2017-04-01",
+        ///     }
+        /// </remarks>
         [HttpPost("{customerId:int}")]
         [HttpPut("{customerId:int}")]
         public async Task<IActionResult> AddService(int customerId, ServiceModel service)
