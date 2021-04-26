@@ -45,17 +45,27 @@ namespace PricingService.Calculations
                     freeDays = 0;
                 }
 
-                finalPrice += GetServicePrice(daysUsed, service);
+                finalPrice += GetServicePrice(daysUsed, from, to, service);
             }
 
             return finalPrice;
         }
 
-        private static double GetServicePrice(int usedDays, ServiceModel service)
+        private static double GetServicePrice(int usedDays, DateTime from, DateTime to, ServiceModel service)
         {
             double discountFactor = service.Discount != null ? service.Discount.DiscountPercent / 100.0 : 0;
 
-            return service.Price * usedDays * (1 - discountFactor);
+            int discountDays = 0;
+
+            if (service.Discount != null)
+            {
+                DateTime discountStart = DateTime.Compare(service.Discount.StartDate, from) > 0 ? service.Discount.StartDate : from;
+                DateTime discountEnd = service.Discount.EndDate != null && DateTime.Compare((DateTime)service.Discount.EndDate, to) < 0 ? (DateTime)service.Discount.EndDate : to;
+
+                discountDays = DayCalculator.GetDays(discountStart, discountEnd, service.BillingDays.Select(x => x.Day).ToArray());
+            }
+
+            return service.Price * ((usedDays - discountDays) + discountDays * (1 - discountFactor));
         }
     }
 }

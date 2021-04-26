@@ -16,7 +16,7 @@ namespace PricingService.Model
         public string ServiceName { get; set; }
         [Required]
         public double DiscountPercent { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? EndDate { get; set; }
         [Required]
         public DateTime StartDate { get; set; }
     }
