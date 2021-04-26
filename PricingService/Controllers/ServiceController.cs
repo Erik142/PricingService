@@ -13,7 +13,7 @@ namespace PricingService.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class ServiceController : Controller
+    public class ServiceController : ControllerBase
     {
         private PricingDbContext _dbContext;
         private ILogger<ServiceController> _logger;

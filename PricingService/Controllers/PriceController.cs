@@ -14,7 +14,7 @@ namespace PricingService.Controllers
     [Produces("application/json")]
     [ApiController]
     [Route("/api/v1/[controller]")]
-    public class PriceController : Controller
+    public class PriceController : ControllerBase
     {
         private ILogger<PriceController> _logger;
         private PricingDbContext _dbContext;
