@@ -34,19 +34,7 @@
                 }
             </remarks>
         </member>
-        <member name="M:PricingService.Controllers.DiscountController.DeleteDiscount(System.Int32,System.String)">
-            <summary>
-            Deletes the discount for the specified service and customer.
-            </summary>
-            <param name="customerId">The customer id</param>
-            <param name="serviceName">The name of the service</param>
-            <remarks>
-            Sample request:
-                
-                DELETE api/v1/discount/50/servicea
-            </remarks>
-        </member>
-        <member name="M:PricingService.Controllers.DiscountController.SetFreeDays(PricingService.Model.FreeDaysModel)">
+        <member name="M:PricingService.Controllers.FreeDaysController.SetFreeDays(PricingService.Model.FreeDaysModel)">
             <summary>
             Adds or updates free days for the specified customer. 
             Use POST to add free days to the customer, or PUT to update free days for the customer.
@@ -55,14 +43,14 @@
             <remarks>
             Sample request:
                 
-                POST/PUT api/v1/discount/freedays/
+                POST/PUT api/v1/freedays/
                 {
                     "CustomerId": 50
                     "FreeDays": 100
                 }
             </remarks>
         </member>
-        <member name="M:PricingService.Controllers.DiscountController.GetFreeDays(System.Int32)">
+        <member name="M:PricingService.Controllers.FreeDaysController.GetFreeDays(System.Int32)">
             <summary>
             Retrieves the free days for the specified customer
             </summary>
@@ -70,7 +58,7 @@
             <remarks>
             Sample request:
             
-                GET api/v1/discount/freedays/50
+                GET api/v1/freedays/50
             </remarks>
         </member>
         <member name="M:PricingService.Controllers.PriceController.GetTotal(System.Int32,PricingService.Model.PriceFilterModel)">
