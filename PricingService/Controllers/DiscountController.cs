@@ -133,53 +133,5 @@ namespace PricingService.Controllers
             await _dbContext.SaveChangesAsync();
             return Ok();
         }
-
-        /// <summary>
-        /// Deletes the discount for the specified service and customer.
-        /// </summary>
-        /// <param name="customerId">The customer id</param>
-        /// <param name="serviceName">The name of the service</param>
-        /// <remarks>
-        /// Sample request:
-        ///     
-        ///     DELETE api/v1/discount/50/servicea
-        /// </remarks>
-        [Consumes("application/json")]
-        [HttpDelete("{customerId:int}/{serviceName}")]
-        public async Task<IActionResult> DeleteDiscount(int customerId, string serviceName)
-        {
-            CustomerModel customer = _dbContext.Customers
-                .Include(x => x.FreeDays)
-                .Include(x => x.UsedServices)
-                .ThenInclude(x => x.Discount)
-                .FirstOrDefault(x => x.Id == customerId);
-
-            if (customer == null)
-            {
-                ModelState.AddModelError("customerId", "The customer with the specified customer id does not exist.");
-                return BadRequest(ModelState);
-            }
-
-            if (!customer.UsedServices.Any(x => x.ServiceName.ToUpperInvariant() == serviceName.ToUpperInvariant()))
-            {
-                ModelState.AddModelError("serviceName", "The customer does not use the service with the specified name.");
-                return BadRequest(ModelState);
-            }
-
-            ServiceModel serviceModel = customer.UsedServices.First(x => x.ServiceName.ToUpperInvariant() == serviceName.ToUpperInvariant());
-            DiscountModel discountModel = serviceModel.Discount;
-
-            if (discountModel == null)
-            {
-                ModelState.AddModelError("serviceName", "There is no discount applied to the specified service.");
-                return BadRequest(ModelState);
-            }
-
-            serviceModel.Discount = null;
-            _dbContext.Discounts.Remove(discountModel);
-
-            await _dbContext.SaveChangesAsync();
-            return Ok();
-        }
     }
 }
